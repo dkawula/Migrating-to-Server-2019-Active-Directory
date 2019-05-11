@@ -2320,7 +2320,7 @@ Invoke-DemoVMPrep 'cc_DC03' 'DC03' -FullServer2019
 Invoke-DemoVMPrep 'cc_DC04' 'DC04' -FullServer2019
 
 Invoke-DemoVMPrep 'cc_DHCP01' 'DHCP01'-FullServer2016
-Invoke-DemoVMPrep 'cc_DHCP02' 'DHCP01'-FullServer2016
+Invoke-DemoVMPrep 'cc_DHCP02' 'DHCP02'-FullServer2019
 Invoke-DemoVMPrep 'cc_Management01' 'Management01' -FullServer2016
 Invoke-DemoVMPrep 'cc_Router01' 'Router01' -FullServer2016
 #Invoke-DemoVMPrep 'DRTitan01' 'DRTitan01' -FullServer2016
