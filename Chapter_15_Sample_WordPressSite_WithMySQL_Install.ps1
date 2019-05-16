@@ -110,7 +110,8 @@ $MYSQL_INIT = "$MYSQL_PDTA\mysql-init.sql"
 # Download and install MySQL
 "`r`n$MYSQL_PROD ..."
 "  - Downloading"
-Invoke-WebRequest "$MYSQL_URL" -OutFile "$MYSQL_ZIP.zip"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-WebRequest -uri "$MYSQL_URL" -OutFile "$MYSQL_ZIP.zip"
 "  - Expanding"
 Expand-Archive "$MYSQL_ZIP.zip" "$MYSQL_PATH"
 "  - Renaming destination directory"
@@ -168,10 +169,12 @@ Remove-Item $MYSQL_INIT
 #>
 
 # Set temporary variables to be used during PHP installation
-$PHP_ZIP = "php-7.1.15-nts-Win32-VC14-x64.zip"
+$PHP_ZIP = "php-7.1.29-nts-Win32-VC14-x64.zip"
 $PHP_PATH = "$env:ProgramFiles\PHP\v7.1"
 $PHP_DATA = "$env:ProgramData\PHP\v7.1"
 $WINCACHE = "wincache-2.0.0.8-dev-7.1-nts-vc14-x64"
+$WINCacheURI = "https://sourceforge.net/projects/wincache/files/development/wincache-2.0.0.8-dev-7.1-nts-vc14-x64.exe/download"
+$WINCacheEXE = "wincache-2.0.0.8-dev-7.1-nts-vc14-x64.exe"
 
 # Download and install PHP
 "`r`nPHP 7.1 ..."
@@ -183,12 +186,19 @@ Expand-Archive "$PHP_ZIP" "$PHP_PATH"
 Copy-Item "$PHP_PATH\php.ini-production" "$PHP_PATH\php.ini"
 "Done."
 
+#Download and install chrome
+" - Downloading and installing Chrome"
+$LocalTempDir = $env:TEMP; $ChromeInstaller = "ChromeInstaller.exe"; (new-object System.Net.WebClient).DownloadFile('http://dl.google.com/chrome/install/375.126/chrome_installer.exe', "$LocalTempDir\$ChromeInstaller"); & "$LocalTempDir\$ChromeInstaller" /silent /install; $Process2Monitor =  "ChromeInstaller"; Do { $ProcessesFound = Get-Process | ?{$Process2Monitor -contains $_.Name} | Select-Object -ExpandProperty Name; If ($ProcessesFound) { "Still running: $($ProcessesFound -join ', ')" | Write-Host; Start-Sleep -Seconds 2 } else { rm "$LocalTempDir\$ChromeInstaller" -ErrorAction SilentlyContinue -Verbose } } Until (!$ProcessesFound)
+
+
 # Download and install WinCache
 "`r`nWinCache 2.0 ..."
 "  - Downloading"
-Invoke-WebRequest "https://nchc.dl.sourceforge.net/project/wincache/development/$WINCACHE.exe" -OutFile "$WINCACHE.exe"
+
+Invoke-WebRequest -Uri $WINCacheURI -OutFile $WINCacheEXE -UserAgent [Microsoft.PowerShell.Commands.PSUserAgent]::Chrome
+
 "  - Expanding"
-Start-Process "$WINCACHE.exe" "/Q /C /T:""$env:USERPROFILE\Downloads\$WINCACHE""" -Wait
+Start-Process "wincache-2.0.0.8-dev-7.1-nts-vc14-x64.exe" "/Q /C /T:""$env:USERPROFILE\Downloads\$WINCACHE""" -Wait
 "  - Installing"
 Copy-Item "$WINCACHE\php_wincache.dll" "$PHP_PATH\ext\php_wincache.dll"
 "  - Removing temporary files"
@@ -223,12 +233,12 @@ Set-PHPSetting upload_max_filesize 20M
 
 # Relocate the PHP "Logs" directory
 $PHP_LOGS = "$PHP_DATA\Logs"
-New-Item $PHP_LOGS -ItemType Directory | Out-Null
+New-Item $PHP_LOGS -ItemType Directory -Force | Out-Null
 Set-PHPSetting error_log "$PHP_LOGS\php_errors.log"
 
 # Relocate the PHP “Upload” directory to address potential media permission issues
 $PHP_UPLOAD = "$PHP_DATA\Upload"
-New-Item $PHP_UPLOAD -ItemType Directory | Out-Null
+New-Item $PHP_UPLOAD -ItemType Directory -force | Out-Null
 Add-NTFSAccess $PHP_UPLOAD IUSR Modify
 Add-NTFSAccess $PHP_UPLOAD IIS_IUSRS Modify
 Set-PHPSetting upload_tmp_dir "$PHP_UPLOAD"
