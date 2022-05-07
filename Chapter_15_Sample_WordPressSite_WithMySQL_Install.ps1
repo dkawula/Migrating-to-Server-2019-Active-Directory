@@ -6,7 +6,7 @@
 #May 7, 2022
 <#
 ================================================================================
-===== WordPress Installation Script for Windows Server 2016 and Windows 10 =====
+===== WordPress Installation Script for Windows Server 2012/2016 and Windows 10 =====
 ================================================================================
 #>
 
