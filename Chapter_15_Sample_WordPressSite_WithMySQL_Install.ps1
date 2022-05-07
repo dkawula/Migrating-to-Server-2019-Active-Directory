@@ -94,8 +94,8 @@ Import-Module NTFSSecurity
 Install-Module VcRedist
 Import-Module VcRedist
 New-Item -Itemtype Directory -Path C:\Post-Install -Name VcRedist
-$VcList = Get-VcList | Get-VcRedist -Path "C:\Temp\VcRedist"
-$VcList | Install-VcRedist -Path C:\Temp\VcRedist
+$VcList = Get-VcList | Get-VcRedist -Path "C:\Post-Install\VcRedist"
+$VcList | Install-VcRedist -Path C:\Post-Install\VcRedist
 
 
 "Done."
