@@ -1,5 +1,9 @@
 # Full Credit for this initial script to: https://gist.githubusercontent.com/TechnologistAU/33c61dced4f4437695f5c8beb7ab5144/raw
-
+#Script Updated and tested on Windows 2012R2 VM
+#This Script Requires WMF 5.1 to be installed first other than that it works
+#If it fails check the URL's for PHP those constantly change
+#Updated by Dave Kawula -MVP
+#May 7, 2022
 <#
 ================================================================================
 ===== WordPress Installation Script for Windows Server 2016 and Windows 10 =====
@@ -66,10 +70,14 @@ Start-Process "msiexec.exe" "/i rewrite_amd64.msi /qn" -Wait
 
 # Download and extract the "File System Security PowerShell Module"
 "`r`nFile System Security PowerShell Module ..."
-"  - Downloading"
-Invoke-WebRequest "https://gallery.technet.microsoft.com/scriptcenter/1abd77a5-9c0b-4a2b-acef-90dbb2b84e85/file/107400/19/NTFSSecurity.zip" -OutFile "NTFSSecurity.zip"
-"  - Expanding"
-Expand-Archive "NTFSSecurity.zip" "$env:ProgramFiles\WindowsPowerShell\Modules\NTFSSecurity"
+#"  - Downloading"
+#Invoke-WebRequest "https://gallery.technet.microsoft.com/scriptcenter/1abd77a5-9c0b-4a2b-acef-90dbb2b84e85/file/107400/19/NTFSSecurity.zip" -OutFile "NTFSSecurity.zip"
+#"  - Expanding"
+#Expand-Archive "NTFSSecurity.zip" "$env:ProgramFiles\WindowsPowerShell\Modules\NTFSSecurity"
+#Need WMF5.1 if installing this on 2012R2
+Install-Module -Name NTFSSecurity -RequiredVersion 4.2.4
+Import-Module NTFSSecurity
+
 "Done."
 
 <#
@@ -77,20 +85,28 @@ Expand-Archive "NTFSSecurity.zip" "$env:ProgramFiles\WindowsPowerShell\Modules\N
 #>
 
 # Download and install the Visual C++ 2013 Redistributable (required for MySQL)
-"`r`nVisual C++ 2013 Redistributable ..."
-"  - Downloading"
-Invoke-WebRequest "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe" -OutFile "vc_redist_2013_x64.exe"
-"  - Installing"
-.\vc_redist_2013_x64.exe /Q
+"`r`nVisual C++ Redistributables ..."
+#"  - Downloading"
+#Invoke-WebRequest "https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe" -OutFile "vc_redist_2013_x64.exe"
+#"  - Installing"
+#.\vc_redist_2013_x64.exe /Q
+
+Install-Module VcRedist
+Import-Module VcRedist
+New-Item -Itemtype Directory -Path C:\Post-Install -Name VcRedist
+$VcList = Get-VcList | Get-VcRedist -Path "C:\Temp\VcRedist"
+$VcList | Install-VcRedist -Path C:\Temp\VcRedist
+
+
 "Done."
 
 # Download and install the Visual C++ 2015 Redistributable (required for PHP 7.x)
-"`r`nVisual C++ 2015 Redistributable ..."
-"  - Downloading"
-Invoke-WebRequest "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe" -OutFile "vc_redist_2015_x64.exe"
-"  - Installing"
-.\vc_redist_2015_x64.exe /Q
-"Done."
+#"`r`nVisual C++ 2015 Redistributable ..."
+#"  - Downloading"
+#Invoke-WebRequest "https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe" -OutFile "vc_redist_2015_x64.exe"
+#"  - Installing"
+#.\vc_redist_2015_x64.exe /Q
+#"Done."
 
 <#
 ============================== MySQL Server 5.7 ================================
@@ -169,9 +185,9 @@ Remove-Item $MYSQL_INIT
 #>
 
 # Set temporary variables to be used during PHP installation
-$PHP_ZIP = "php-7.1.29-nts-Win32-VC14-x64.zip"
-$PHP_PATH = "$env:ProgramFiles\PHP\v7.1"
-$PHP_DATA = "$env:ProgramData\PHP\v7.1"
+$PHP_ZIP = "php-7.4.29-nts-Win32-VC15-x64.zip"
+$PHP_PATH = "$env:ProgramFiles\PHP\v7.4"
+$PHP_DATA = "$env:ProgramData\PHP\v7.4"
 $WINCACHE = "wincache-2.0.0.8-dev-7.1-nts-vc14-x64"
 $WINCacheURI = "https://sourceforge.net/projects/wincache/files/development/wincache-2.0.0.8-dev-7.1-nts-vc14-x64.exe/download"
 $WINCacheEXE = "wincache-2.0.0.8-dev-7.1-nts-vc14-x64.exe"
