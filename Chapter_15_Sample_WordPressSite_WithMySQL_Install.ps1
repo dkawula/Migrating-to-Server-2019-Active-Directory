@@ -185,7 +185,7 @@ Remove-Item $MYSQL_INIT
 #>
 
 # Set temporary variables to be used during PHP installation
-$PHP_ZIP = "php-7.4.29-nts-Win32-VC15-x64.zip"
+$PHP_ZIP = "php-7.4.30-nts-Win32-VC15-x64.zip"
 $PHP_PATH = "$env:ProgramFiles\PHP\v7.4"
 $PHP_DATA = "$env:ProgramData\PHP\v7.4"
 $WINCACHE = "wincache-2.0.0.8-dev-7.1-nts-vc14-x64"
